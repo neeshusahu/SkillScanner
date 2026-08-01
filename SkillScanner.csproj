@@ -14,4 +14,8 @@
     <PackageReference Include="YamlDotNet" Version="18.1.0" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Compile Remove="Test/**/*.cs" />
+  </ItemGroup>
+
 </Project>
