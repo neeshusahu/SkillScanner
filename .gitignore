@@ -1,0 +1,22 @@
+# Build output
+[Bb]in/
+[Oo]bj/
+
+# Visual Studio / Rider user-specific files
+.vs/
+.idea/
+*.suo
+*.user
+*.userosscache
+*.sln.docstates
+
+# .NET tooling
+TestResults/
+artifacts/
+*.nupkg
+*.snupkg
+project.lock.json
+
+# OS-generated files
+.DS_Store
+Thumbs.db
