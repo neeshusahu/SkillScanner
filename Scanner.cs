@@ -32,7 +32,7 @@ public class Scanner
             List<RuleResult> result=new List<RuleResult>();
             if(string.IsNullOrEmpty(path))
             {
-                return;
+               throw new ArgumentException("Path cannot be null or empty.", nameof(path));
             }
             //Parse the skill document and get SkillData
             var skillData = _input.ProcessInput(path);

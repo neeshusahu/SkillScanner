@@ -1,4 +1,5 @@
 using Microsoft.Extensions.DependencyInjection;
+using SkillScanner.ExceptionHandler;
 using SkillScanner.Inputs;
 using SkillScanner.Mapping;
 using SkillScanner.Output;
@@ -15,7 +16,8 @@ public static class DependencyInjection
         services.AddTransient<IParser<SkillData>, YamlParser>();
         services.AddTransient<IParser<string>, MarkDownParser>();
         services.AddTransient<IInput, Input>();
-        
+        services.AddTransient<IExceptionHandler, ConsoleExceptionHandler>();
+
          var ruleType = typeof(IRule);
 
         foreach (var type in ruleType.Assembly.GetTypes()

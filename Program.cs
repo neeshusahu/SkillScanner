@@ -11,6 +11,7 @@ using Markdig.Parsers;
 using SkillScanner.SkillRule;
 using SkillScanner.Output;
 using System.CommandLine;
+using SkillScanner.ExceptionHandler;
 
 // Create a service collection and register the dependencies
 
@@ -38,13 +39,17 @@ scanCommand.SetAction(parseResult =>
     Console.WriteLine($"Scanning {filePath}");
 
     var scanner= serviceProvider.GetRequiredService<Scanner>();
+    var exceptionHandler = serviceProvider.GetRequiredService<IExceptionHandler>();
 
-    if (scanner == null)
-   {
-    Console.WriteLine("Failed to parse the skill document.");
-    return;
-   }
-   scanner.Scan(filePath);
+   try
+{
+    scanner.Scan(filePath);
+}
+catch (Exception ex)
+{
+    exceptionHandler.Handle(ex);
+}
+   
 });
 
 rootCommand.Subcommands.Add(scanCommand);
