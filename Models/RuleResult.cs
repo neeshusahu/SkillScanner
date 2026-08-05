@@ -4,7 +4,6 @@ public class RuleResult
     public RuleType RuleType { get; set; }
     public  string? Message { get; set; }
 
-    public RuleSeverity Severity { get; set; }
 }
 
 

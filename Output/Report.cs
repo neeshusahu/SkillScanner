@@ -14,6 +14,12 @@ public class Report : IReport
         reportBuilder.AppendLine("====================");
         reportBuilder.AppendLine($"Generated on: {DateTime.Now}");
         reportBuilder.AppendLine();
+        if (ruleResults == null || ruleResults.Count == 0)
+        {
+            reportBuilder.AppendLine("No rule results to report.");
+            Console.WriteLine(reportBuilder.ToString());
+            return;
+        }
 
         // Implement logic to generate a report based on the rule results
         foreach (var key in ruleResults.Keys)
@@ -23,7 +29,7 @@ public class Report : IReport
             {
                 reportBuilder.AppendLine($"Rule: {result.RuleType.Name}");
               reportBuilder.AppendLine($"Message: {result.Message}");
-              reportBuilder.AppendLine($"Severity: {result.Severity}");
+              reportBuilder.AppendLine($"Severity: {result.RuleType.Severity}");
                reportBuilder.AppendLine();
             }
         }

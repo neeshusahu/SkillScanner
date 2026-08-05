@@ -7,6 +7,7 @@ using SkillScanner.Parser;
 using SkillScanner.Output;
 using SkillScanner.SkillRule;
 using YamlDotNet.Core.Tokens;
+using SkillScanner.LLMClient;
 
 public class Scanner
 {
@@ -14,19 +15,22 @@ public class Scanner
         private readonly IReport _report;
         private readonly IInput  _input;
         private readonly IEnumerable<IRule> _rules;
+
+        private readonly ILLMClient _llmClient;
     
 
-        public Scanner( IReport report, IInput input, IEnumerable<IRule> rules)
+        public Scanner( IReport report, IInput input, IEnumerable<IRule> rules, ILLMClient llmClient)
         {
             //_mapper = mapper;
             //_yamlParser = yamlParser;
             _report = report;
             _input = input;
             _rules = rules;
+            _llmClient = llmClient;
             // _markdownParser = markdownParser;
         }
 
-        public void Scan( string path, string outputPath="")
+        public async Task  Scan( string path, string outputPath="")
         {
             
             List<RuleResult> result=new List<RuleResult>();
@@ -44,7 +48,7 @@ public class Scanner
             //Evaluate the rules on the SkillData
            foreach (var rule in _rules)
             {
-                var ruleResults = rule.Evaluate(skillData);
+                var ruleResults = await rule.EvaluateAsync(skillData, _llmClient);
                 result.AddRange(ruleResults);
             }
 

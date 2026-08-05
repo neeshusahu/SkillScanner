@@ -1,8 +1,9 @@
 
+using SkillScanner.LLMClient;
 using SkillScanner.Models;
 
 namespace SkillScanner.SkillRule;
 public interface IRule
 {
-   IEnumerable<RuleResult> Evaluate(SkillData skillData);
+   Task<IEnumerable<RuleResult>> EvaluateAsync(SkillData skillData, ILLMClient llmClient, CancellationToken cancellationToken = default);
 }

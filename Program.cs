@@ -32,7 +32,7 @@ var scanCommand = new Command("scan", "Scan a skill file");
 
 scanCommand.Arguments.Add(new Argument<string>("filePath"));
 
-scanCommand.SetAction(parseResult =>
+scanCommand.SetAction(async parseResult =>
 {
     var filePath = parseResult.GetValue<string>("filePath");
 
@@ -43,7 +43,7 @@ scanCommand.SetAction(parseResult =>
 
    try
 {
-    scanner.Scan(filePath);
+   await scanner.Scan(filePath);
 }
 catch (Exception ex)
 {
