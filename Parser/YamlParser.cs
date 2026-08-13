@@ -18,7 +18,7 @@ public class YamlParser : IParser<SkillData>
        
     }
 
-    public SkillData Parse(string ?skillMetadata)
+    public async Task<SkillData> ParseAsync(string ?skillMetadata)
     {
         if (string.IsNullOrEmpty(skillMetadata))
         {

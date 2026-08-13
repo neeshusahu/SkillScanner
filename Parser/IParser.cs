@@ -1,5 +1,5 @@
 namespace SkillScanner.Parser;
 public interface IParser<T>
 {
-   T Parse(string? data);
+   Task<T> ParseAsync(string? data);
 }

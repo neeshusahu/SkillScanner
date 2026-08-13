@@ -4,6 +4,8 @@ public class RuleResult
     public RuleType RuleType { get; set; }
     public  string? Message { get; set; }
 
+    public bool IsFlagged { get; init;}= false;
+
 }
 
 

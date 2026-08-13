@@ -33,16 +33,16 @@ public class Input : IInput
         };
     }
     // Implement the ProcessInput method to parse the skill document and return SkillData
-    public SkillData? ProcessInput(string path)
+    public async Task<SkillData?> ProcessInputAsync(string path)
     {
         var skillDocument = GetSkillDocument(path);
 
 
-        SkillData? skillData = _parser.Parse(skillDocument.SkillMetadata) as SkillData;
+        SkillData? skillData = await _parser.ParseAsync(skillDocument.SkillMetadata) as SkillData;
         ;
         if (skillData != null)
         {
-            skillData.SkillMarkDown = _markdownParser.Parse(skillDocument.SkillContent) as string;
+            skillData.SkillMarkDown = await _markdownParser.ParseAsync(skillDocument.SkillContent) as string;
         }
         return skillData;
 

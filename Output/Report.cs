@@ -6,33 +6,33 @@ public class Report : IReport
 {
     
 
-    public void GenerateReport(Dictionary<int, List<RuleResult>> ruleResults, string filePath)
+    public void GenerateReport(Dictionary<string, List<RuleResult>> ruleResults)
     {
          StringBuilder reportBuilder = new StringBuilder();
         reportBuilder.AppendLine($"Skill Scanner Report");
-        reportBuilder.AppendLine("File Path: " + filePath);
-        reportBuilder.AppendLine("====================");
-        reportBuilder.AppendLine($"Generated on: {DateTime.Now}");
-        reportBuilder.AppendLine();
-        if (ruleResults == null || ruleResults.Count == 0)
+        foreach (var filePath in ruleResults.Keys)
         {
-            reportBuilder.AppendLine("No rule results to report.");
-            Console.WriteLine(reportBuilder.ToString());
-            return;
-        }
+            reportBuilder.AppendLine($"File Path: {filePath}");
+            reportBuilder.AppendLine("====================");
+            reportBuilder.AppendLine($"Generated on: {DateTime.Now}");
+            reportBuilder.AppendLine();
+            if (ruleResults[filePath] == null || ruleResults[filePath].Count == 0)
+            {
+                reportBuilder.AppendLine("No rule results to report.");
+                continue;
+            }
 
-        // Implement logic to generate a report based on the rule results
-        foreach (var key in ruleResults.Keys)
-        {
-            reportBuilder.AppendLine($"Rule Type: {key}");
-            foreach(var result in ruleResults[key])
+            // Implement logic to generate a report based on the rule results
+            foreach (var result in ruleResults[filePath])
             {
                 reportBuilder.AppendLine($"Rule: {result.RuleType.Name}");
-              reportBuilder.AppendLine($"Message: {result.Message}");
-              reportBuilder.AppendLine($"Severity: {result.RuleType.Severity}");
-               reportBuilder.AppendLine();
+                reportBuilder.AppendLine($"Message: {result.Message}");
+                reportBuilder.AppendLine($"Severity: {result.RuleType.Severity}");
+                reportBuilder.AppendLine();
             }
         }
+     
+        
         Console.WriteLine(reportBuilder.ToString());
     
     }

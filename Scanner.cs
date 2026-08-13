@@ -8,6 +8,9 @@ using SkillScanner.Output;
 using SkillScanner.SkillRule;
 using YamlDotNet.Core.Tokens;
 using SkillScanner.LLMClient;
+using System.Linq;
+using System.Diagnostics;
+using System.Collections.Concurrent;
 
 public class Scanner
 {
@@ -29,39 +32,120 @@ public class Scanner
             _llmClient = llmClient;
             // _markdownParser = markdownParser;
         }
+    //Sequentially scan the skill files in the given path and generate a report#region Name
 
-        public async Task  Scan( string path, string outputPath="")
+
+    #region   Sequential Scan
+    public async Task Scan(string path, string outputPath = "")
+
+    {
+
+       Dictionary<string, List<RuleResult>> result = new Dictionary<string, List<RuleResult>>();
+        if (string.IsNullOrEmpty(path))
         {
-            
-            List<RuleResult> result=new List<RuleResult>();
-            if(string.IsNullOrEmpty(path))
-            {
-               throw new ArgumentException("Path cannot be null or empty.", nameof(path));
-            }
-            //Parse the skill document and get SkillData
-            var skillData = _input.ProcessInput(path);
+            throw new ArgumentException("Path cannot be null or empty.", nameof(path));
+        }
+        //Parse the skill document and get SkillData
+        foreach (var file in Directory.EnumerateFiles(path, "*.md", SearchOption.AllDirectories))
+        {
+            var stopwatch = Stopwatch.StartNew();
+            Console.WriteLine($"Processing file at Time: {DateTime.Now:yyyy-MM-dd HH:mm:ss} - {file}");
+            var skillData = await _input.ProcessInputAsync(file);
 
             if (skillData == null)
             {
-                throw new InvalidOperationException("Failed to parse the skill content.");
+                throw new InvalidOperationException($"Failed to parse the skill content from file: {file}");
             }
-            //Evaluate the rules on the SkillData
-           foreach (var rule in _rules)
-            {
-                var ruleResults = await rule.EvaluateAsync(skillData, _llmClient);
-                result.AddRange(ruleResults);
-            }
+              foreach (var rule in _rules)
+                {
+                    var ruleResults = await rule.EvaluateAsync(skillData, _llmClient);
+                    if (!result.ContainsKey(file))
+                    {
+                        result[file] = new List<RuleResult>();
+                    }
+                    result[file].AddRange(ruleResults);
+                }
 
-        Dictionary<int, List<RuleResult>> resultsByRuleType = result
-                                        .GroupBy(r => r.RuleType.Id)
-                                       .ToDictionary(
-                                        g => g.Key,
-                                        g => g.ToList());
+            
+            //Evaluate the rules on the SkillData
+
+            Console.WriteLine($"Completed processing file at Time: {DateTime.Now:yyyy-MM-dd HH:mm:ss} - {file}");
+            stopwatch.Stop();
+
+            Console.WriteLine($"Total Time Taken For File {file}: {stopwatch.Elapsed}");
+
+            _rules.First().CountCalls();
+       
 
         //Generate the report based on the results
-        _report.GenerateReport(resultsByRuleType, path);
-            
-                       
+      
         }
+  
+       
+         _report.GenerateReport(result);
+
+
     }
+
+    
+    #endregion
+
+    #region Parallel Scan
+//     // public async Task ScanParallel(string path, string outputPath = "")
+//     {
+//           ConcurrentBag<RuleResult> result = new ConcurrentBag<RuleResult>();
+//           //BenchMarking the time taken for the entire scan process
+//           var fileTimings = new ConcurrentBag<(string File, TimeSpan Elapsed, int CallCount)>();
+// var overallStopwatch = Stopwatch.StartNew();
+//         if (string.IsNullOrEmpty(path))
+//         {
+//             throw new ArgumentException("Path cannot be null or empty.", nameof(path));
+//         }
+//         //Parse the skill document and get SkillData
+//         var parallelOptions = new ParallelOptions
+//         {
+//             MaxDegreeOfParallelism = 4 // Adjust this based on your system's capabilities
+//         };
+//        await Parallel.ForEachAsync(Directory.EnumerateFiles(path, "*.md", 
+//        SearchOption.AllDirectories), parallelOptions, async (file, cancellationToken) =>
+//         {
+//             var stopwatch = Stopwatch.StartNew();
+//             Console.WriteLine($"Processing file at Time: {DateTime.Now:yyyy-MM-dd HH:mm:ss} - {file}");
+//             var skillData = await _input.ProcessInputAsync(file);
+
+//             if (skillData == null)
+//             {
+//                 throw new InvalidOperationException($"Failed to parse the skill content from file: {file}");
+//             }
+//             foreach (var num in Enumerable.Range(1, 10))
+//             {
+//                 foreach (var rule in _rules)
+//                 {
+//                     var ruleResults = await rule.EvaluateAsync(skillData, _llmClient, cancellationToken);
+//                     foreach (var ruleResult in ruleResults)
+//                     {
+//                         result.Add(ruleResult);
+//                     }
+//                 }
+//             }
+
+//             stopwatch.Stop();
+//             fileTimings.Add((File: file, Elapsed: stopwatch.Elapsed, CallCount: _rules.Count()));
+//             Console.WriteLine($"Completed processing file at Time: {DateTime.Now:yyyy-MM-dd HH:mm:ss} - {file}");
+//             Console.WriteLine($"Total Time Taken For File {file}: {stopwatch.Elapsed}");
+//         });
+//         overallStopwatch.Stop();
+//         Console.WriteLine($"Total Time Taken For All Files: {overallStopwatch.Elapsed}");
+//         _rules.First().CountCalls();
+//         Dictionary<int, List<RuleResult>> resultsByRuleType = result
+//                                         .GroupBy(r => r.RuleType.Id)
+//                                        .ToDictionary(
+//                                         g => g.Key,
+//                                         g => g.ToList());
+
+//         //Generate the report based on the results
+//         _report.GenerateReport(resultsByRuleType, path);
+//     }
+    #endregion
+}
 

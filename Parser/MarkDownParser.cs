@@ -7,7 +7,7 @@ public class MarkDownParser : IParser<String>
     public MarkDownParser()
     {
     }
-    public String Parse(string? data)
+    public async Task<string> ParseAsync(string? data)
     {
         if (string.IsNullOrWhiteSpace(data))
         {
