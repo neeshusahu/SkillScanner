@@ -1,6 +1,7 @@
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Threading;
+using Markdig.Syntax;
 
 namespace SkillScanner.LLMClient;
 public class OllamaClient : ILLMClient
@@ -15,7 +16,7 @@ public class OllamaClient : ILLMClient
     public OllamaClient(HttpClient httpClient)
     {
         _httpClient = httpClient;
-        _httpClient.Timeout = TimeSpan.FromSeconds(20);
+       //_httpClient.Timeout = TimeSpan.FromSeconds(20);
     }
 
     public async Task<LLMVerdict> GetResponseAsync(string systemPrompt, string userPrompt, CancellationToken cancellationToken = default)
@@ -25,7 +26,8 @@ public class OllamaClient : ILLMClient
             system = systemPrompt,
             prompt = userPrompt,
             format = "json",
-            stream = false
+            stream = false,
+            options=new {temperature=0}
         };
 
           HttpResponseMessage response;
@@ -53,12 +55,13 @@ public class OllamaClient : ILLMClient
         {
             throw new Exception("Failed to deserialize the response from Ollama API.");
         }
-        Console.WriteLine($"Ollama API Response: {ollamaResponse.Response}");
+        //Console.WriteLine($"Ollama API Response: {ollamaResponse.Response}");
         return new LLMVerdict
         {
             IsFlagged = result.IsFlagged,
             Confidence = result.Confidence,
-            Reasoning = result.Reasoning
+            Reasoning = result.Reasoning,
+            Source= VerdictSource.LLMGrounded
         };
 
 

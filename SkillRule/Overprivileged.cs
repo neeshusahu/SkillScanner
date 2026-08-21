@@ -9,7 +9,7 @@ namespace SkillScanner.SkillRule;
 public class Overprivileged : RuleBase
 
 {
-    public Overprivileged(ILLMClient llmClient) : base(llmClient)
+    public Overprivileged(ILLMClient llmClient, IVectorRepository vectorRepository, IEmbeddingClient embeddingClient, IMarkdownChunker markdownChunker) : base(llmClient, vectorRepository, embeddingClient,markdownChunker)
     {
     }
     protected override RuleType RuleType { get; } = new RuleType
@@ -57,9 +57,9 @@ public class Overprivileged : RuleBase
     }
     private void EvaluateWriteAccess(SkillData skillData, List<RuleResult> results)
     {
-        string[] identityFiles = ["memory.md", "soul.md"];
-        skillData.SkillMarkDown = skillData.SkillMarkDown?.ToLower();
-        if (!string.IsNullOrEmpty(skillData.SkillMarkDown) && identityFiles.Any(file => skillData.SkillMarkDown.Contains(file)))
+        string[] notAllowedInputs = ["memory.md", "soul.md", "curl", "bash"];
+        skillData.SkillMarkdownContent = skillData.SkillMarkdownContent?.ToLower();
+        if (!string.IsNullOrEmpty(skillData.SkillMarkdownContent) && notAllowedInputs.Any(file => skillData.SkillMarkdownContent.Contains(file)))
         {
             results.Add(new RuleResult
             {

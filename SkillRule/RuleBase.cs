@@ -1,7 +1,9 @@
 
+using System.Collections;
 using System.Data;
 using System.Diagnostics;
 using System.Net.Mail;
+using System.Reflection.Metadata;
 using SkillScanner.LLMClient;
 using SkillScanner.Models;
 using SkillScanner.SkillRule;
@@ -14,9 +16,16 @@ public abstract class RuleBase : IRule
 
     protected ILLMClient LLMClient { get; set; }
 
-    public RuleBase(ILLMClient llmClient)
+    protected IMarkdownChunker MarkdownChunker {get;set;}
+    protected IVectorRepository VectorRepository {get;set;}
+    protected IEmbeddingClient EmbeddingClient{get;set;}
+
+    public RuleBase(ILLMClient llmClient, IVectorRepository vectorRepository, IEmbeddingClient embeddingClient, IMarkdownChunker markdownChunker)
     {
         LLMClient = llmClient;
+        VectorRepository=vectorRepository;
+        EmbeddingClient=embeddingClient;
+        MarkdownChunker=markdownChunker;
     }
     protected static int SuccessCount = 0;
     protected static int FailureCount = 0;
@@ -46,7 +55,7 @@ public abstract class RuleBase : IRule
         {
             llmVerdict = await LLMClient.GetResponseAsync(
                 SystemPrompt,
-                skillData.SkillMarkDown ?? "",
+                skillData.SkillMarkdownContent ?? "",
                 cancellationToken);
         }
         catch (OperationCanceledException) when (!cancellationToken.IsCancellationRequested)
@@ -87,7 +96,61 @@ public abstract class RuleBase : IRule
         return new RuleResult();
     }
 
-    public virtual async Task<IEnumerable<RuleResult>> EvaluateAsync(SkillData skillData, ILLMClient llmClient, CancellationToken cancellationToken = default)
+   
+    protected  async Task<IEnumerable<ChunkJudgment>> EvaluateWithVectorSimilarityAndLLM(SkillData skillData, CancellationToken cancellationToken=default)
+    {
+       List<ChunkJudgment> chunkJudgments=new List<ChunkJudgment>();
+        if(skillData.SkillMarkdown==null)
+        {
+            throw new ArgumentNullException();
+        }
+        var documentChunks= MarkdownChunker.Chunk(skillData.SkillMarkdown);
+        LLMVerdict lLMVerdict= new LLMVerdict();
+        foreach(var chunk in documentChunks)
+        {
+            
+            var embeddedChunks= await EmbeddingClient.GetEmbeddingAsync(chunk.Content);
+            var similarChunks= await VectorRepository.SearchSimilarTextAsync(embeddedChunks, RuleType.Id);
+            foreach(var item in similarChunks)
+            {
+                Console.WriteLine($"similarChunk: {item.Content} {item.Distance}, {item.RuleId}, {item.TextId}");
+            }
+            if(similarChunks.Count()==0)
+              continue;
+
+            var allBenign= similarChunks.All(chunk=> chunk.RuleId==null && chunk.Distance<=0.5);
+            var allViolation= similarChunks.All(chunk=> chunk.RuleId==RuleType.Id && chunk.Distance<=0.5);
+            if(allBenign || allViolation)
+            {
+               lLMVerdict=new LLMVerdict()
+               {
+                IsFlagged = allViolation,
+                 Confidence = 1.0 - similarChunks.First().Distance,
+                 Reasoning = $"Unanimous match against {(allViolation ? "violation" : "benign")} reference examples.",
+                 Source = VerdictSource.RagGrounded
+               };
+            }
+            else
+            {
+                var benignChunk=similarChunks.FirstOrDefault(chunk=>chunk.RuleId==null);
+                var violatedChunk= similarChunks.FirstOrDefault(chunk=>chunk.RuleId==RuleType.Id);
+                var ambiguousPrompt= PromptBuilder.BuildAmbiguousPrompt(chunk.Content, violatedChunk, benignChunk);
+                lLMVerdict=await LLMClient.GetResponseAsync( SystemPrompt,ambiguousPrompt,  cancellationToken);
+                lLMVerdict.Source=VerdictSource.LLMGrounded;
+                
+            }
+            Console.WriteLine($"LLMVerdict: {lLMVerdict.Reasoning}");
+           chunkJudgments.Add(new ChunkJudgment()
+           {
+               Chunk=chunk,
+               Matches=new List<TextCorpusMatch>(similarChunks),
+               Verdict=lLMVerdict,
+           });
+
+        }
+        return  chunkJudgments;
+    }
+    public virtual async Task<IEnumerable<RuleResult>> EvaluateAsync(SkillData skillData, CancellationToken cancellationToken = default)
     {
        
         var ruleResults = new List<RuleResult>();
@@ -107,9 +170,36 @@ public abstract class RuleBase : IRule
         
         return ruleResults;
     }
+
+    public virtual async Task<IEnumerable<RuleResult>> EvaluateAsyncWithRAG(SkillData skillData, CancellationToken cancellationToken=default)
+    {
+        var ruleResults = EvaluateDeterministic(skillData).ToList();
+
+    if (ruleResults.Count == 0)
+    {
+        var chunkJudgments = await EvaluateWithVectorSimilarityAndLLM(skillData, cancellationToken);
+        Console.WriteLine("Jugements Count", chunkJudgments.Count());
+        var violatedChunks = chunkJudgments.Where(c => c.Verdict.IsFlagged).ToList();
+
+        if (violatedChunks.Count > 0)
+        {
+            ruleResults.Add(new RuleResult
+            {
+                IsFlagged = true,
+                Message = "Check following content: " + string.Join(" | ", violatedChunks.Select(c => c.Chunk.Content)),
+                RuleType = RuleType
+            });
+        }
+    }
+
+    return ruleResults;
+    }
+   
     public void CountCalls()
     {
         Console.WriteLine($"Total Success Count: {SuccessCount}, Total Failure Count: {FailureCount}, UnFlagged Count: {TotalCount - SuccessCount - FailureCount}");
         Console.WriteLine($"Total Evaluations: {TotalCount}");
     }
+
+   
 }

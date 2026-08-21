@@ -19,17 +19,23 @@ public class Scanner
         private readonly IInput  _input;
         private readonly IEnumerable<IRule> _rules;
 
-        private readonly ILLMClient _llmClient;
+        private readonly IVectorRepository _vectorRepository;
+
+        private readonly IEmbeddingClient _embeddingClient;
+
+       
     
 
-        public Scanner( IReport report, IInput input, IEnumerable<IRule> rules, ILLMClient llmClient)
+        public Scanner( IReport report, IInput input, IEnumerable<IRule> rules, ILLMClient llmClient, IVectorRepository vectorRepository, IEmbeddingClient embeddingClient)
         {
             //_mapper = mapper;
             //_yamlParser = yamlParser;
             _report = report;
             _input = input;
             _rules = rules;
-            _llmClient = llmClient;
+            _vectorRepository=vectorRepository;
+            _embeddingClient=embeddingClient;
+          
             // _markdownParser = markdownParser;
         }
     //Sequentially scan the skill files in the given path and generate a report#region Name
@@ -39,7 +45,7 @@ public class Scanner
     public async Task Scan(string path, string outputPath = "")
 
     {
-
+       await VectorCorpusSeeder.SeedAsync(_vectorRepository, _embeddingClient);
        Dictionary<string, List<RuleResult>> result = new Dictionary<string, List<RuleResult>>();
         if (string.IsNullOrEmpty(path))
         {
@@ -58,7 +64,9 @@ public class Scanner
             }
               foreach (var rule in _rules)
                 {
-                    var ruleResults = await rule.EvaluateAsync(skillData, _llmClient);
+                    //var ruleResults = await rule.EvaluateAsync(skillData);
+                    //Try with RAG
+                    var ruleResults=await rule.EvaluateAsyncWithRAG(skillData);
                     if (!result.ContainsKey(file))
                     {
                         result[file] = new List<RuleResult>();

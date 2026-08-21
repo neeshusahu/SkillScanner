@@ -1,4 +1,5 @@
 using Markdig.Parsers;
+using Markdig.Syntax;
 using SkillScanner.Mapping;
 using SkillScanner.Parser;
 using YamlDotNet.Core;
@@ -6,13 +7,13 @@ using YamlDotNet.Core;
 namespace SkillScanner.Inputs;
 public class Input : IInput
 {
-    private readonly IMapper<SkillData> _mapper;
-    private IParser<SkillData> _parser;
-    private IParser<string> _markdownParser;
 
-    public Input(IMapper<SkillData> mapper, IParser<SkillData> parser, IParser<string> markdownParser)
+    private IParser<SkillData> _parser;
+    private IParser<MarkdownDocument> _markdownParser;
+
+    public Input( IParser<SkillData> parser, IParser<MarkdownDocument> markdownParser)
     {
-        _mapper = mapper;
+        
         _parser = parser;
         _markdownParser = markdownParser;
     }
@@ -39,10 +40,11 @@ public class Input : IInput
 
 
         SkillData? skillData = await _parser.ParseAsync(skillDocument.SkillMetadata) as SkillData;
-        ;
+        
         if (skillData != null)
         {
-            skillData.SkillMarkDown = await _markdownParser.ParseAsync(skillDocument.SkillContent) as string;
+            skillData.SkillMarkdownContent= skillDocument.SkillMetadata;
+            skillData.SkillMarkdown = await _markdownParser.ParseAsync(skillDocument.SkillContent);
         }
         return skillData;
 

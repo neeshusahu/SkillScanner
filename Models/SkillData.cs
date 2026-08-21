@@ -1,4 +1,6 @@
 
+using Markdig.Syntax;
+
 public class SkillData
 {
     public string? Name { get; set; }
@@ -6,6 +8,7 @@ public class SkillData
     public string? Compatibility { get; set; }
 
     public string? Permission { get; set; }
-   
-    public string? SkillMarkDown { get; set; }
+    
+    public string? SkillMarkdownContent {get;set;}
+    public MarkdownDocument? SkillMarkdown{get;set;}
 }

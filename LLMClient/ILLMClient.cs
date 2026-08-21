@@ -1,4 +1,6 @@
 
+using Markdig.Syntax;
+
 namespace SkillScanner.LLMClient;
 public interface ILLMClient
 {
