@@ -3,11 +3,6 @@ using System.Text.Json;
 using Dapper;
 using Markdig.Syntax;
 using Microsoft.Data.Sqlite;
-using SkillScanner.Inputs;
-using SkillScanner.LLMClient;
-using SkillScanner.Mapping;
-using SkillScanner.Parser;
-using SkillScanner.SkillRule;
 
 public class OverpriviledgedWithRAGTest
 {
@@ -39,6 +34,7 @@ public class OverpriviledgedWithRAGTest
 
     private double trueNegatives = 0.0;
     private double falseNegatives = 0.0;
+    
     [OneTimeSetUp]
      public async Task Setup()
     {

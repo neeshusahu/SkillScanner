@@ -4,15 +4,6 @@ using System.Text.Json;
 using Dapper;
 using Markdig.Syntax;
 using Microsoft.Data.Sqlite;
-using NUnit.Framework.Interfaces;
-using SkillScanner.Inputs;
-using SkillScanner.LLMClient;
-using SkillScanner.Mapping;
-using SkillScanner.Parser;
-using SkillScanner.SkillRule;
-
-
-namespace SkillScanner.Tests;
 
 
 public class OverprivilegedWithLLMFallbackTest

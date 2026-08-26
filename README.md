@@ -35,7 +35,7 @@ ollama pull phi4-mini          # local LLM judge — optional, enables LLM fallb
 ollama pull nomic-embed-text   # local embedding model — needed for the RAG path
 ollama serve
 
-dotnet run -- scan <path-to-skill-folder-or-file>
+dotnet run --project src -- scan <path-to-skill-folder-or-file>
 ```
 
 Running the eval set:

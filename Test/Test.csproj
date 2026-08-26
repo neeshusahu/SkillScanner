@@ -17,7 +17,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="../SkillScanner.csproj" />
+    <ProjectReference Include="../src/SkillScanner.csproj" />
   </ItemGroup>
   <ItemGroup>
   <None Include="EvalSet\**\*.*">

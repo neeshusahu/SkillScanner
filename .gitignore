@@ -23,3 +23,9 @@ Thumbs.db
 
 # Project specific
 /Skills
+BenchMarking/Parallel.md
+
+Docs/Benchmarking/ParallelOuput.md
+Docs/Benchmarking/SequentialOutput.md
+BenchMarking/Sequential.md
+
