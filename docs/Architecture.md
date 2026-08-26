@@ -247,7 +247,7 @@ GenerateReportFile(...)
 Task<T> ParseAsync(string? data)
 ```
 
-### `MarkDownParser.cs` — class, implements `IParser<MarkdownDocument>` 
+### `MarkdownParser.cs` — class, implements `IParser<MarkdownDocument>` 
 
 Uses a Markdig pipeline with `UsePipeTables()` to parse Markdown tables into an AST.
 
@@ -257,7 +257,7 @@ Depends on `IMapper<SkillData>`.
 
 Deserializes YAML using camelCase → dictionary → maps to `SkillData` through `SkillMetaDataMapping`.
 
-### `MarkDownParserWithChunks.cs` — class unused 
+### `MarkdownParserWithChunks.cs` — class unused 
 
 Implements:
 
