@@ -5,8 +5,7 @@ using Microsoft.Data.Sqlite;
 using Microsoft.Extensions.DependencyInjection;
 
 
-
-public static class DependencyInjection
+public static class ServiceCollectionExtension
 {
     public static IServiceCollection AddSkillScanner(this IServiceCollection services)
     {
