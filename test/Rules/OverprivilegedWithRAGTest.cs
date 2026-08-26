@@ -4,7 +4,7 @@ using Dapper;
 using Markdig.Syntax;
 using Microsoft.Data.Sqlite;
 
-public class OverpriviledgedWithRAGTest
+public class OverprivilegedWithRAGTest
 {
 
      private IMapper<SkillData> mapper;
@@ -42,7 +42,7 @@ public class OverpriviledgedWithRAGTest
         #region Input & Parser
         IMapper<SkillData> mapper = new ReflectionMapper<SkillData>();
         yamlParser = new YamlParser(mapper);
-        markDownParser = new MarkDownParser();
+        markDownParser = new MarkdownParser();
         input=new Input(yamlParser, markDownParser);
         #endregion
         #region LLM & Embedding

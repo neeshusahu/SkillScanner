@@ -44,7 +44,7 @@ public class OverprivilegedWithLLMFallbackTest
         //Instantiate the Input class 
         IMapper<SkillData> mapper = new ReflectionMapper<SkillData>();
         yamlParser = new YamlParser(mapper);
-        markDownParser = new MarkDownParser();
+        markDownParser = new MarkdownParser();
         input = new Input( yamlParser, markDownParser);
         //Instantiate the LLMClient
         var httpClient = new HttpClient

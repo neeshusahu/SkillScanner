@@ -58,7 +58,7 @@ The CLI is built on `System.CommandLine`, exposing a `scan` subcommand (`skillli
 ## Architecture
 
 ```
-CLI  (skilllint scan <path>)
+CLI  (skillscanner scan <path>)
         │
         ▼
 Scanner.Scan(path)

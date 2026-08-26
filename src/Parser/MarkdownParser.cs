@@ -2,10 +2,10 @@ using Markdig;
 using Markdig.Syntax;
 
 
-public class MarkDownParser : IParser<MarkdownDocument>
+public class MarkdownParser : IParser<MarkdownDocument>
 {
     private readonly MarkdownPipeline pipeline;
-    public MarkDownParser()
+    public MarkdownParser()
     {
      pipeline=new MarkdownPipelineBuilder()
     .UsePipeTables()

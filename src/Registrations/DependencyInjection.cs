@@ -13,7 +13,7 @@ public static class DependencyInjection
         services.AddSingleton(typeof(IMapper<>), typeof(ReflectionMapper<>));
         services.AddTransient<IReport, Report>();
         services.AddTransient<IParser<SkillData>, YamlParser>();
-        services.AddTransient<IParser<MarkdownDocument>, MarkDownParser>();
+        services.AddTransient<IParser<MarkdownDocument>, MarkdownParser>();
         
         services.AddTransient<IInput, Input>();
         services.AddTransient<IExceptionHandler, ConsoleExceptionHandler>();
