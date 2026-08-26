@@ -8,6 +8,7 @@ runs differ only in how those 110 calls are scheduled against Ollama.
 
 ## Results
 
+
 | Metric | Sequential (`Sequential.md`) | Parallel, `MaxDegreeOfParallelism = 4` (`ParallelOuput.md`) |
 | --- | ---: | ---: |
 | Total LLM calls | 110 | 110 |

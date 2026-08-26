@@ -35,7 +35,7 @@ ollama pull phi4-mini          # local LLM judge — optional, enables LLM fallb
 ollama pull nomic-embed-text   # local embedding model — needed for the RAG path
 ollama serve
 
-dotnet run --project src -- scan <path-to-skill-folder-or-file>
+dotnet run -- scan <path-to-skill-folder-or-file>
 ```
 
 Running the eval set:
@@ -145,7 +145,7 @@ RAG-grounded verdict    ambiguous → LLM tie-break
 - **`EvaluateAsync`** (whole-document LLM fallback) — when deterministic rules find nothing, the entire skill's markdown content is sent to the LLM as a single prompt, using the rule's `SystemPrompt` plus a fixed `JsonContract` telling it to return `{"isFlagged", "confidence", "reasoning"}`. Simple and cheap in call count (1 call per file per rule), but coarse — the LLM judges the whole document at once with no retrieved grounding.
 - **`EvaluateAsyncWithRAG`** — the document is split into semantically meaningful chunks (`MarkdownChunker`, heading/paragraph/list/table-aware), each chunk is embedded and compared against a curated per-rule reference corpus (`TextCorpus`/`TextCorpusEmbeddings`, seeded by `VectorCorpusSeeder`). If a chunk's nearest neighbors unanimously agree (all violation examples, or all benign within a distance threshold), the verdict is decided from that vote with **no LLM call**. Only chunks that land ambiguously — close to both a violation and a benign reference — fall back to an LLM tie-break (`PromptBuilder.BuildAmbiguousPrompt`), given both reference examples as context. Chunk verdicts are then rolled up: if any chunk is flagged, the file is flagged. This keeps LLM calls proportional to *ambiguous* content instead of one call per file, and grounds each escalated call in concrete reference examples rather than judging in a vacuum.
 
-Full design notes: [Docs/Database.md](Docs/Database.md) (why the corpus is anchored on rule-labeled reference snippets, not scanned-document chunks) and [Docs/Challenges.md](Docs/Challenges.md) (real failure cases hit along the way, including a false-positive from semantically-close-but-wrong retrieved examples, and the `float[]`→`BLOB` serialization bridge needed for `sqlite-vec`).
+Full design notes: [docs/Database.md](docs/Database.md) (why the corpus is anchored on rule-labeled reference snippets, not scanned-document chunks) and [docs/Challenges.md](docs/Challenges.md) (real failure cases hit along the way, including a false-positive from semantically-close-but-wrong retrieved examples, and the `float[]`→`BLOB` serialization bridge needed for `sqlite-vec`).
 
 ## Report format
 
@@ -176,7 +176,7 @@ Severity: High
 
 (repeated per additional triggered rule for that file). There's currently no machine-readable output mode (JSON, SARIF, etc.) and no failing exit code on a flagged scan.
 
-See [Docs/Sample_Output.md](Docs/Sample_Output.md) for a real run against 11 unmodified skill files.
+See [docs/Sample_Output.md](docs/Sample_Output.md) for a real run against 11 unmodified skill files.
 
 ## Packages and models
 
@@ -193,9 +193,9 @@ See [Docs/Sample_Output.md](Docs/Sample_Output.md) for a real run against 11 unm
 | `Microsoft.Extensions.Http` | 10.0.10 | Typed `HttpClient`s for the Ollama LLM/embedding clients |
 | `System.CommandLine` | 2.0.10 | CLI argument parsing (the `scan` subcommand) |
 
-**Tests (`Test/Test.csproj`):** `NUnit` 4.2.2, `NUnit3TestAdapter` 4.6.0, `NUnit.Analyzers`, `Microsoft.NET.Test.Sdk` 17.12.0
+**Tests (`test/Test.csproj`):** `NUnit` 4.2.2, `NUnit3TestAdapter` 4.6.0, `NUnit.Analyzers`, `Microsoft.NET.Test.Sdk` 17.12.0
 
-**Models, both served locally via [Ollama](https://ollama.com/)** — see [Docs/Ollama_Setup.md](Docs/Ollama_Setup.md) and [Docs/Embedding_Setup.md](Docs/Embedding_Setup.md):
+**Models, both served locally via [Ollama](https://ollama.com/)** — see [docs/Ollama_Setup.md](docs/Ollama_Setup.md) and [docs/Embedding_Setup.md](docs/Embedding_Setup.md):
 
 | Model | Role |
 | --- | --- |
@@ -204,19 +204,19 @@ See [Docs/Sample_Output.md](Docs/Sample_Output.md) for a real run against 11 unm
 
 ## Eval set
 
-A small labeled eval set (`Test/EvalSet/`, 10 hand-written `SKILL.md` samples — 4 clearly over-privileged, 4 clearly scoped correctly, 2 borderline) checks the AST03 rule's predictions against ground truth (`ground_truth.json`), via two NUnit harnesses covering each evaluation path: `Test/Rules/OverprivilegedWithLLMFallbackTest.cs` (`EvaluateAsync`) and `Test/Rules/OverpriviledgedWithRAGTest.cs` (`EvaluateAsyncWithRAG`). Each run buckets predictions into a confusion matrix and asserts **recall ≥ 0.8** (missing a real over-privileged skill is the costlier failure for a security linter) and **precision ≥ 0.5** (some false positives are an acceptable tradeoff). Full write-up, including why recall is weighted higher and the caveats of a 10-sample set: [Docs/Evaluation.md](Docs/Evaluation.md).
+A small labeled eval set (`test/EvalSet/`, 10 hand-written `SKILL.md` samples — 4 clearly over-privileged, 4 clearly scoped correctly, 2 borderline) checks the AST03 rule's predictions against ground truth (`ground_truth.json`), via two NUnit harnesses covering each evaluation path: `test/Rules/OverprivilegedWithLLMFallbackTest.cs` (`EvaluateAsync`) and `test/Rules/OverpriviledgedWithRAGTest.cs` (`EvaluateAsyncWithRAG`). Each run buckets predictions into a confusion matrix and asserts **recall ≥ 0.8** (missing a real over-privileged skill is the costlier failure for a security linter) and **precision ≥ 0.5** (some false positives are an acceptable tradeoff). Full write-up, including why recall is weighted higher and the caveats of a 10-sample set: [docs/Evaluation.md](docs/Evaluation.md).
 
 ## Database
 
-The RAG path's vector store is a curated, rule-labeled corpus (`Rules` → `TextCorpus` → `TextCorpusEmbeddings`), not embeddings of scanned documents — an earlier per-chunk design was rejected because chunk-level ground truth doesn't exist (`isFlagged` is a document-level label). Full schema, the rejected Version 1 design, and the runtime query flow: [Docs/Database.md](Docs/Database.md).
+The RAG path's vector store is a curated, rule-labeled corpus (`Rules` → `TextCorpus` → `TextCorpusEmbeddings`), not embeddings of scanned documents — an earlier per-chunk design was rejected because chunk-level ground truth doesn't exist (`isFlagged` is a document-level label). Full schema, the rejected Version 1 design, and the runtime query flow: [docs/Database.md](docs/Database.md).
 
 ## Benchmarking
 
-Both sequential and parallel scan paths exist in `Scanner`. Sequential processes files one at a time end-to-end; a parallel variant (`Parallel.ForEachAsync`) fans out file processing, but a real benchmark run exposed a hard constraint: **Ollama serves one generation request at a time**, so N files in flight × M rules per file means N×M concurrent LLM calls competing for a single-threaded backend. A run with 4 files in parallel × 10 rules (40 concurrent calls) saw 102 of 110 calls time out, versus 108/110 completing sequentially — parallel finished faster in wall-clock time but at the cost of losing almost all real model responses. The proposed fix — gating the actual LLM call behind a shared semaphore sized to Ollama's real concurrency, independent of file/rule-level `Task` parallelism — is documented but **not yet implemented**. Full numbers and the fix design: [Docs/Benchmarking/Benchmarking.md](Docs/Benchmarking/Benchmarking.md).
+Both sequential and parallel scan paths exist in `Scanner`. Sequential processes files one at a time end-to-end; a parallel variant (`Parallel.ForEachAsync`) fans out file processing, but a real benchmark run exposed a hard constraint: **Ollama serves one generation request at a time**, so N files in flight × M rules per file means N×M concurrent LLM calls competing for a single-threaded backend. A run with 4 files in parallel × 10 rules (40 concurrent calls) saw 102 of 110 calls time out, versus 108/110 completing sequentially — parallel finished faster in wall-clock time but at the cost of losing almost all real model responses. The proposed fix — gating the actual LLM call behind a shared semaphore sized to Ollama's real concurrency, independent of file/rule-level `Task` parallelism — is documented but **not yet implemented**. Full numbers and the fix design: [docs/Benchmarking/Benchmarking.md](docs/Benchmarking/Benchmarking.md).
 
 ## Embedding
 
-Chunks and corpus entries are embedded with `nomic-embed-text` via Ollama's `/api/embed` endpoint (`OllamaEmbeddingClient`), returning a 768-dimension `float[]`. Since SQLite has no native array-of-floats column type, embeddings are bridged through `VectorSerializer` (`float[]` → `byte[]`, a raw reinterpretation, not a value transform) before being stored as a `BLOB` in `sqlite-vec`'s `vec0` virtual tables. Chunking itself (`MarkdownChunker`) is heading/paragraph/list/table-aware rather than fixed-size — each chunk carries its nearest enclosing heading as context rather than splitting mid-thought. See [Docs/Embedding_Setup.md](Docs/Embedding_Setup.md) and the serialization walkthrough in [Docs/Challenges.md](Docs/Challenges.md).
+Chunks and corpus entries are embedded with `nomic-embed-text` via Ollama's `/api/embed` endpoint (`OllamaEmbeddingClient`), returning a 768-dimension `float[]`. Since SQLite has no native array-of-floats column type, embeddings are bridged through `VectorSerializer` (`float[]` → `byte[]`, a raw reinterpretation, not a value transform) before being stored as a `BLOB` in `sqlite-vec`'s `vec0` virtual tables. Chunking itself (`MarkdownChunker`) is heading/paragraph/list/table-aware rather than fixed-size — each chunk carries its nearest enclosing heading as context rather than splitting mid-thought. See [docs/Embedding_Setup.md](docs/Embedding_Setup.md) and the serialization walkthrough in [docs/Challenges.md](docs/Challenges.md).
 
 ## Current coverage
 

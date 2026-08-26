@@ -5,6 +5,7 @@ This project evaluates the `Overprivileged` rule (the only rule with LLM/RAG pat
 far) against a small, hand-labeled eval set, using [NUnit](https://nunit.org/) as the
 test runner and a precision/recall confusion matrix as the scoring method.
  
+ 
 ## Known limitations (read this first)
  
 - **n = 10 is a smoke-test-sized sample, not a statistically powered eval.** A single
