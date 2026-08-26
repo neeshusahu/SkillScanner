@@ -21,17 +21,17 @@ The calls ran effectively serially: the total LLM duration is only about 0.24 se
 
 | File | Calls | LLM Time | Average per Call |
 | --- | ---: | ---: | ---: |
-| `azure-key-vault.md` | 10 | 70.28s | 7.03s |
-| `azure-kubernetes-service.md` | 10 | 98.93s | 9.89s |
-| `azure-reliability.md` | 10 | 101.92s | 10.19s |
-| `azure-application-insights.md` | 10 | 112.05s | 11.21s |
-| `Skill.md` | 10 (2 timeouts) | 164.86s | 16.49s |
-| `azure-service-health.md` | 10 | 125.37s | 12.54s |
-| `azure-monitor.md` | 10 | 115.68s | 11.57s |
-| `azure-log-analytics.md` | 10 | 119.60s | 11.96s |
-| `azure-policy.md` | 10 | 123.32s | 12.33s |
-| `azure-resiliency.md` | 10 | 121.66s | 12.17s |
-| `azure-devops.md` | 10 | 128.06s | 12.81s |
+| `File_01.md` | 10 | 70.28s | 7.03s |
+| `File_02.md` | 10 | 98.93s | 9.89s |
+| `File_03.md` | 10 | 101.92s | 10.19s |
+| `File_04.md` | 10 | 112.05s | 11.21s |
+| `File_05.md` | 10 (2 timeouts) | 164.86s | 16.49s |
+| `File_06.md` | 10 | 125.37s | 12.54s |
+| `File_07.md` | 10 | 115.68s | 11.57s |
+| `File_08.md` | 10 | 119.60s | 11.96s |
+| `File_09.md` | 10 | 123.32s | 12.33s |
+| `aFile_10.md` | 10 | 121.66s | 12.17s |
+| `File_11.md` | 10 | 128.06s | 12.81s |
 | **Total** | **110** | **1,281.73s** | **11.65s** |
 
 ## Results
