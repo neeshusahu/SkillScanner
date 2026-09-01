@@ -108,10 +108,10 @@ public abstract class RuleBase : IRule
             
             var embeddedChunks= await EmbeddingClient.GetEmbeddingAsync(chunk.Content);
             var similarChunks= await VectorRepository.SearchSimilarTextAsync(embeddedChunks, RuleType.Id);
-            foreach(var item in similarChunks)
-            {
-                Console.WriteLine($"similarChunk: {item.Content} {item.Distance}, {item.RuleId}, {item.TextId}");
-            }
+            // foreach(var item in similarChunks)
+            // {
+            //     Console.WriteLine($"similarChunk: {item.Content} {item.Distance}, {item.RuleId}, {item.TextId}");
+            // }
             if(similarChunks.Count()==0)
               continue;
 
@@ -136,7 +136,7 @@ public abstract class RuleBase : IRule
                 lLMVerdict.Source=VerdictSource.LLMGrounded;
                 
             }
-            Console.WriteLine($"LLMVerdict: {lLMVerdict.Reasoning}");
+            //Console.WriteLine($"LLMVerdict: {lLMVerdict.Reasoning}");
            chunkJudgments.Add(new ChunkJudgment()
            {
                Chunk=chunk,
