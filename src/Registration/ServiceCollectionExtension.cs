@@ -31,11 +31,14 @@ public static class ServiceCollectionExtension
         services.AddHttpClient<ILLMClient, OllamaClient>(client =>
         {
             client.BaseAddress = new Uri("http://localhost:11434");
+            //client.BaseAddress=new Uri("http://ollama:11434");
+            //host.docker.internal
         });
         
         services.AddHttpClient<IEmbeddingClient, OllamaEmbeddingClient>(client=>
         {
             client.BaseAddress = new Uri("http://localhost:11434");
+            //client.BaseAddress=new Uri("http://ollama:11434");
         });
         services.AddSingleton<IVectorRepository, VectorRepository>();
 

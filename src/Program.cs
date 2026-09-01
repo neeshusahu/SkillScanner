@@ -16,7 +16,7 @@ var serviceProvider = services.BuildServiceProvider();
 //Create a root command, sub command and pass the argument
 
 
-var rootCommand = new RootCommand("skilllint");
+var rootCommand = new RootCommand("skillscanner");
 
 var scanCommand = new Command("scan", "Scan a skill file");
 

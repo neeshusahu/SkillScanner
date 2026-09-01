@@ -1,0 +1,25 @@
+# Build artifacts (host-built — wrong OS/arch for the container, and would shadow the container's own restore/build output)
+**/bin/
+**/obj/
+
+# VCS / editor
+.git/
+.gitignore
+.gitattributes
+.vs/
+.idea/
+.vscode/
+.DS_Store
+
+# Not needed to build or run the app
+docs/
+Skills/
+BenchMarking/
+README.md
+Dockerfile
+.dockerignore
+
+# Local runtime artifacts
+*.db
+*.db-shm
+*.db-wal
